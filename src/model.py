@@ -1,7 +1,12 @@
 import joblib
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    precision_score,
+    recall_score,
+)
 
 
 class Model:
@@ -20,8 +25,10 @@ class Model:
     def evaluate(self, X_test, y_test):
         y_pred = self.predict(X_test)
         score = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred)
+        recall = recall_score(y_test, y_pred)
         cls_report = classification_report(y_test, y_pred)
-        return score, cls_report
+        return score, precision, recall, cls_report
 
     def save_data(self, X_train, y_train, X_test, y_test, data_path):
         pd.concat([X_train, y_train], axis=1).to_csv(

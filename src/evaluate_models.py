@@ -24,7 +24,9 @@ if __name__ == "__main__":
         X_test = df_test.drop("y", axis=1)
         y_test = df_test["y"]
 
-        score, cls_report = model_instance.evaluate(X_test, y_test)
+        score, precision, recall, cls_report = model_instance.evaluate(X_test, y_test)
 
         print(f"Accuracy: {score}")
+        print(f"Precision {precision}")
+        print(f"Recall {recall}")
         print(f"Classification Report:\n{cls_report}")
