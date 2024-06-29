@@ -1,38 +1,39 @@
-import hashlib
 import os
-import time
 import pandas as pd
-
+from sklearn.ensemble import RandomForestClassifier
 from model import Model
 from data_creation import create_data
-from sklearn.ensemble import RandomForestClassifier
 
 if __name__ == "__main__":
     basedir = os.path.dirname(os.path.abspath(__file__))
     parent_dir = os.path.dirname(basedir)
 
     artifacts_dir = "artifacts"
-    model_dir = "model"
+    model_subdir = "model"
     data_dir = "data"
     dataset_name = "dataset.csv"
-    data_path = os.path.join(parent_dir, data_dir, dataset_name)
-    execution_id = str(len(os.listdir(os.path.join(parent_dir, artifacts_dir))) + 1)
-    model_path = os.path.join(parent_dir, artifacts_dir, execution_id, model_dir)
+    data_path = os.path.join(parent_dir, data_dir)
 
-    create_data(data_path)
-    df = pd.read_csv(data_path)
+    execution_id = str(len(os.listdir(os.path.join(parent_dir, artifacts_dir))) + 1)
+    model_path = os.path.join(parent_dir, artifacts_dir, execution_id, model_subdir)
+
+    if not os.path.exists(model_path):
+        os.makedirs(model_path)
+
+    create_data(os.path.join(data_path, dataset_name))
+    df = pd.read_csv(os.path.join(data_path, dataset_name))
     X = df.drop("y", axis=1)
     y = df["y"]
 
-    modelo = Model(
-        model_type=RandomForestClassifier(
-            n_estimators=100,
-            random_state=42,
-        ),
-        X=X,
-        y=y,
-    )
+    rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model_instance = Model(rf_model)
+    model_instance.train(X, y)
 
-    modelo.train()
-    os.makedirs(model_path, exist_ok=True)
-    modelo.save_model(model_path + f"/model_v{execution_id}.pkl")
+    model_instance.save_model(model_path)
+    model_instance.save_data(
+        model_instance.X_train,
+        model_instance.y_train,
+        model_instance.X_test,
+        model_instance.y_test,
+        data_path,
+    )
